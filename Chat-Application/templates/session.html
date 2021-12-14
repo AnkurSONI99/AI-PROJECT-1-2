@@ -1,0 +1,117 @@
+<!-- Uses base.html template as base -->
+{% extends "base.html" %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Flask_Chat_App</title>
+</head>
+
+<body>
+  {% block logout %}
+  <div style="padding-right: 100px">
+    <button type="button" class="btn btn-outline-success my-2 my-sm-0"
+      onclick="window.location.href='{{url_for('logout')}}';">Logout</button>
+  </div>
+
+  {% endblock %}
+  {% block content %}
+  <br>
+  <div class="container" style="position: fixed; padding-left: 120px; z-index: 9999; background-color: #eeeeee">
+    <form action="">
+      <input type="text" class="message form-control" placeholder="Type here!" style="width: 300px" />
+      <br>
+      <input type="submit" class="btn btn-success" value="Send">
+    </form>
+  </div>
+  <br>
+  <br>
+  <br>
+  <br>
+  <div class="row" style="z-index: 9998;">
+    <br>
+    <div class="container">
+      <div class="col-md-6">
+        <br>
+        {% if messages %}
+
+        <div class="messageContainer">
+
+        </div>
+
+        {% for i in messages %}
+
+        <div style="word-wrap: break-word">
+          <p><strong><i>{{ i.username }}</i></strong> - {{ i.message }} </p>
+        </div>
+        <br>
+
+        {% endfor %}
+
+        {% endif %}
+        {% if not messages %}
+
+        <div class="col-md-6">
+          <h3 style='color: #ccc;font-size: 30px;'>No message yet!</h3>
+        </div>
+
+        {% endif %}
+        <br>
+      </div>
+    </div>
+
+    <br>
+
+    <div id="onlineUsers" style="position: fixed; padding-left: 800px">
+      <div class="container">
+        <br>
+        <h5>Users online!</h5>
+        <ul>
+          <br>
+          {% for i in users %}
+          {{i.username}} - <i>{{i.name}}</i>
+          <br>
+          <br>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+
+
+  <script type="text/javascript">
+    var socket = io.connect('http://' + document.domain + ':' + location.port, clearTimeout);
+    socket.on('connect', function () {
+      console.log('socket connected')
+      var form = $('form').on('submit', function (e) {
+        console.log('form event triggered')
+        e.preventDefault()
+        if ($('input.message').val()) {
+          console.log('message taken by clint')
+          let user_input = $('input.message').val();
+          socket.emit('my event', {
+            message: user_input
+          })
+        }
+        $('input.message').val('').focus()
+      })
+    })
+    socket.on('my response', function (msg) {
+      console.log('response from server')
+      $('.messageContainer').append("<p style='word-wrap: break-word'><strong><i>" + msg.username + "</i></strong> - " + msg.message + "</p><br>");
+
+    })
+
+  </script>
+  {% endblock %}
+
+</body>
+
+</html>
